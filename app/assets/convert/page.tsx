@@ -575,8 +575,6 @@ const ConvertAssetsPage = () => {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 };

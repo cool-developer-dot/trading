@@ -498,7 +498,6 @@ const TransactionHistoryPage = () => {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 };

@@ -544,8 +544,6 @@ const EarnRewardsPage = () => {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 };
