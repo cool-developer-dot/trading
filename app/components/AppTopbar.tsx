@@ -41,10 +41,9 @@ XIcon.displayName = 'XIcon';
 interface AppTopbarProps {
   isCollapsed: boolean;
   onMenuClick: () => void;
-  isMobile?: boolean;
 }
 
-const AppTopbar = ({ isCollapsed, onMenuClick, isMobile = false }: AppTopbarProps) => {
+const AppTopbar = ({ isCollapsed, onMenuClick }: AppTopbarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -112,25 +111,24 @@ const AppTopbar = ({ isCollapsed, onMenuClick, isMobile = false }: AppTopbarProp
       className={`
         fixed top-0 right-0 h-16 bg-white border-b border-gray-200 z-30 
         transition-all duration-300 flex items-center justify-between px-4 md:px-6
-        ${isMobile ? 'left-0' : (isCollapsed ? 'left-20' : 'left-64')}
+        left-0 md:left-64 md:${isCollapsed ? 'left-20' : 'left-64'}
       `}
     >
-      {/* Left: Menu Button (Mobile) + Page Title */}
+      {/* Left: Hamburger Menu (Mobile) + Page Title */}
       <div className="flex items-center gap-3">
-        {isMobile && (
-          <button
-            onClick={onMenuClick}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <MenuIcon />
-          </button>
-        )}
-        <div className="hidden sm:block">
-          <h1 className="text-lg md:text-xl font-bold text-black">Trading Platform</h1>
-          <p className="text-xs text-gray-500 hidden md:block">Welcome back! Ready to trade?</p>
-        </div>
-        <div className="block sm:hidden">
-          <h1 className="text-base font-bold text-black">Binance</h1>
+        {/* Hamburger Icon - Only visible on mobile */}
+        <button
+          onClick={onMenuClick}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors md:hidden"
+          aria-label="Open menu"
+        >
+          <MenuIcon />
+        </button>
+        
+        {/* Page Title */}
+        <div>
+          <h1 className="text-base sm:text-lg md:text-xl font-bold text-black">Trading Platform</h1>
+          <p className="text-xs text-gray-500 hidden sm:block">Welcome back! Ready to trade?</p>
         </div>
       </div>
 

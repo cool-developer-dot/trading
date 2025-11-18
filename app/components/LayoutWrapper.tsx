@@ -14,23 +14,10 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
   const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   
   // Pages where we don't want the app layout (e.g., auth pages)
   const excludedPaths = ['/auth'];
   const shouldShowAppLayout = !excludedPaths.some(path => pathname.startsWith(path));
-
-  // Detect mobile screen size
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Close mobile sidebar when route changes
   useEffect(() => {
@@ -39,7 +26,7 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
 
   // Prevent body scroll when mobile sidebar is open
   useEffect(() => {
-    if (isMobileSidebarOpen && isMobile) {
+    if (isMobileSidebarOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -48,14 +35,14 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isMobileSidebarOpen, isMobile]);
+  }, [isMobileSidebarOpen]);
 
   const handleSidebarToggle = () => {
-    if (isMobile) {
-      setIsMobileSidebarOpen(prev => !prev);
-    } else {
-      setIsSidebarCollapsed(prev => !prev);
-    }
+    setIsSidebarCollapsed(prev => !prev);
+  };
+
+  const handleMobileMenuToggle = () => {
+    setIsMobileSidebarOpen(prev => !prev);
   };
 
   const handleMobileSidebarClose = () => {
@@ -68,24 +55,24 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Overlay */}
-      {isMobile && isMobileSidebarOpen && (
+      {/* Mobile Overlay - Only show on mobile when sidebar is open */}
+      {isMobileSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden animate-fade-in"
           onClick={handleMobileSidebarClose}
         />
       )}
 
-      {/* Sidebar - Hidden on mobile unless opened */}
+      {/* Sidebar - Desktop: Always visible, Mobile: Slide-in when open */}
       <div className={`
-        ${isMobile ? 'fixed' : 'fixed'}
-        ${isMobile && !isMobileSidebarOpen ? '-translate-x-full' : 'translate-x-0'}
-        transition-transform duration-300 ease-in-out z-50
+        fixed left-0 top-0 h-screen z-50
+        md:translate-x-0
+        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        transition-transform duration-300 ease-in-out
       `}>
         <AppSidebar
-          isCollapsed={isMobile ? false : isSidebarCollapsed}
+          isCollapsed={isSidebarCollapsed}
           onToggle={handleSidebarToggle}
-          isMobile={isMobile}
           onClose={handleMobileSidebarClose}
         />
       </div>
@@ -93,26 +80,23 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
       {/* Main Content Area */}
       <div className={`
         transition-all duration-300
-        ${isMobile ? 'ml-0' : (isSidebarCollapsed ? 'ml-20' : 'ml-64')}
+        md:ml-64 md:${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
       `}>
         {/* Topbar */}
         <AppTopbar
           isCollapsed={isSidebarCollapsed}
-          onMenuClick={handleSidebarToggle}
-          isMobile={isMobile}
+          onMenuClick={handleMobileMenuToggle}
         />
         
         {/* Page Content */}
-        <main className={`
-          pt-16
-          ${isMobile ? 'pb-20' : 'pb-6'}
-          min-h-screen
-        `}>
+        <main className="pt-16 pb-20 md:pb-6 min-h-screen">
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation */}
-        {isMobile && <MobileBottomNav />}
+        {/* Mobile Bottom Navigation - Only show on mobile */}
+        <div className="md:hidden">
+          <MobileBottomNav />
+        </div>
       </div>
     </div>
   );

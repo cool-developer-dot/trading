@@ -99,11 +99,10 @@ WithdrawIcon.displayName = 'WithdrawIcon';
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  isMobile?: boolean;
   onClose?: () => void;
 }
 
-const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: SidebarProps) => {
+const AppSidebar = ({ isCollapsed, onToggle, onClose }: SidebarProps) => {
   const pathname = usePathname();
 
   const navItems = useMemo(
@@ -137,14 +136,14 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
   return (
     <aside
       className={`
-        fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-50 
-        transition-all duration-300 flex flex-col
-        ${isMobile ? 'w-64' : (isCollapsed ? 'w-20' : 'w-64')}
+        h-screen bg-white border-r border-gray-200 flex flex-col
+        transition-all duration-300
+        ${isCollapsed ? 'w-20' : 'w-64'}
       `}
     >
       {/* Logo & Toggle */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
-        {(!isCollapsed || isMobile) && (
+      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
+        {!isCollapsed && (
           <Link href="/" className="flex items-center gap-2" onClick={onClose}>
             <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xl">
               B
@@ -152,43 +151,41 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
             <span className="text-black font-bold text-lg">Binance</span>
           </Link>
         )}
-        {isCollapsed && !isMobile && (
-          <Link href="/" className="flex items-center justify-center w-full">
+        {isCollapsed && (
+          <Link href="/" className="flex items-center justify-center w-full" onClick={onClose}>
             <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xl">
               B
             </div>
           </Link>
         )}
         
-        {/* Close button for mobile */}
-        {isMobile ? (
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <XIcon />
-          </button>
-        ) : (
-          <button
-            onClick={onToggle}
-            className={`p-2 hover:bg-gray-100 rounded-lg transition-colors ${
-              isCollapsed ? 'hidden' : 'block'
-            }`}
-          >
-            <ChevronLeftIcon />
-          </button>
-        )}
+        {/* Close button for mobile, Collapse for desktop */}
+        <button
+          onClick={() => {
+            if (onClose) {
+              onClose(); // Mobile: close sidebar
+            } else {
+              onToggle(); // Desktop: collapse/expand
+            }
+          }}
+          className={`p-2 hover:bg-gray-100 rounded-lg transition-colors ${
+            isCollapsed ? 'hidden md:block' : 'block'
+          }`}
+        >
+          <span className="md:hidden"><XIcon /></span>
+          <span className="hidden md:block"><ChevronLeftIcon /></span>
+        </button>
       </div>
 
       {/* User Profile */}
       <Link
         href="/auth"
         onClick={onClose}
-        className={`m-4 p-3 bg-gradient-to-r from-gray-900 to-black rounded-xl text-white hover:shadow-lg transition-all ${
-          isCollapsed && !isMobile ? 'flex items-center justify-center' : ''
+        className={`m-4 p-3 bg-gradient-to-r from-gray-900 to-black rounded-xl text-white hover:shadow-lg transition-all flex-shrink-0 ${
+          isCollapsed ? 'flex items-center justify-center' : ''
         }`}
       >
-        {(isCollapsed && !isMobile) ? (
+        {isCollapsed ? (
           <UserIcon />
         ) : (
           <div>
@@ -207,8 +204,8 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
       </Link>
 
       {/* Quick Actions */}
-      {(!isCollapsed || isMobile) && (
-        <div className="px-4 mb-4">
+      {!isCollapsed && (
+        <div className="px-4 mb-4 flex-shrink-0">
           <div className="grid grid-cols-2 gap-2">
             {quickActions.map((action) => (
               <Link
@@ -225,7 +222,7 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
         </div>
       )}
 
-      {/* Navigation */}
+      {/* Navigation - Scrollable */}
       <nav className="flex-1 overflow-y-auto px-2">
         <div className="space-y-1">
           {navItems.map((item) => {
@@ -239,11 +236,11 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
                   isActive
                     ? 'bg-black text-white'
                     : 'text-gray-700 hover:bg-gray-100'
-                } ${(isCollapsed && !isMobile) ? 'justify-center' : ''}`}
-                title={(isCollapsed && !isMobile) ? item.name : undefined}
+                } ${isCollapsed ? 'justify-center' : ''}`}
+                title={isCollapsed ? item.name : undefined}
               >
                 <div className="flex-shrink-0">{item.icon}</div>
-                {(!isCollapsed || isMobile) && (
+                {!isCollapsed && (
                   <>
                     <span className="font-medium text-sm flex-1">{item.name}</span>
                     {item.badge && (
@@ -263,7 +260,7 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
 
         {/* Secondary Items */}
         <div className="space-y-1">
-          {(!isCollapsed || isMobile) && (
+          {!isCollapsed && (
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase">
               Support
             </div>
@@ -279,11 +276,11 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
                   isActive
                     ? 'bg-gray-100 text-black'
                     : 'text-gray-600 hover:bg-gray-50'
-                } ${(isCollapsed && !isMobile) ? 'justify-center' : ''}`}
-                title={(isCollapsed && !isMobile) ? item.name : undefined}
+                } ${isCollapsed ? 'justify-center' : ''}`}
+                title={isCollapsed ? item.name : undefined}
               >
                 <div className="flex-shrink-0">{item.icon}</div>
-                {(!isCollapsed || isMobile) && <span className="font-medium text-sm">{item.name}</span>}
+                {!isCollapsed && <span className="font-medium text-sm">{item.name}</span>}
               </Link>
             );
           })}
@@ -291,8 +288,8 @@ const AppSidebar = ({ isCollapsed, onToggle, isMobile = false, onClose }: Sideba
       </nav>
 
       {/* Bottom Info */}
-      {(!isCollapsed || isMobile) && (
-        <div className="p-4 border-t border-gray-200">
+      {!isCollapsed && (
+        <div className="p-4 border-t border-gray-200 flex-shrink-0">
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 mb-2">
             <div className="text-xs font-semibold text-gray-800 mb-1">
               🎁 Trading Bonus
