@@ -71,20 +71,21 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
         isMobileOpen={isMobileSidebarOpen}
       />
       
-      {/* Main Content Area - Adjusted for sidebar */}
-      <div className={`
-        min-h-screen
-        transition-all duration-300
-        md:ml-${isSidebarCollapsed ? '20' : '64'}
-      `}>
-        {/* Topbar */}
+      {/* Main Content Area - Properly positioned with margin */}
+      <div 
+        className={`
+          min-h-screen transition-all duration-300
+          ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}
+        `}
+      >
+        {/* Topbar - Fixed at top */}
         <AppTopbar
           isCollapsed={isSidebarCollapsed}
           onMenuClick={handleMobileMenuToggle}
         />
         
         {/* Page Content */}
-        <main className="pt-16 pb-20 md:pb-6">
+        <main className="pt-16 pb-20 md:pb-6 min-h-screen">
           {children}
         </main>
 

@@ -107,12 +107,10 @@ const AppTopbar = ({ isCollapsed, onMenuClick }: AppTopbarProps) => {
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications]);
 
   return (
-    <div
-      className={`
-        fixed top-0 right-0 h-16 bg-white border-b border-gray-200 z-30 
-        transition-all duration-300 flex items-center justify-between px-4 md:px-6
-        left-0 md:left-64 md:${isCollapsed ? 'left-20' : 'left-64'}
-      `}
+    <div className="fixed top-0 left-0 right-0 md:left-64 h-16 bg-white border-b border-gray-200 z-30 flex items-center justify-between px-4 md:px-6 transition-all duration-300"
+      style={{
+        left: typeof window !== 'undefined' && window.innerWidth >= 768 ? (isCollapsed ? '5rem' : '16rem') : '0'
+      }}
     >
       {/* Left: Hamburger Menu (Mobile) + Page Title */}
       <div className="flex items-center gap-3">
