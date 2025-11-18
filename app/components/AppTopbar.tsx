@@ -3,6 +3,13 @@
 import { memo, useState, useCallback, useMemo, useEffect } from 'react';
 import SearchModal from './SearchModal';
 
+const MenuIcon = memo(() => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+));
+MenuIcon.displayName = 'MenuIcon';
+
 const SearchIcon = memo(() => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -33,9 +40,11 @@ XIcon.displayName = 'XIcon';
 
 interface AppTopbarProps {
   isCollapsed: boolean;
+  onMenuClick: () => void;
+  isMobile?: boolean;
 }
 
-const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
+const AppTopbar = ({ isCollapsed, onMenuClick, isMobile = false }: AppTopbarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -100,31 +109,46 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
 
   return (
     <div
-      className={`fixed top-0 right-0 h-16 bg-white border-b border-gray-200 z-30 transition-all duration-300 flex items-center justify-between px-6 ${
-        isCollapsed ? 'left-20' : 'left-64'
-      }`}
+      className={`
+        fixed top-0 right-0 h-16 bg-white border-b border-gray-200 z-30 
+        transition-all duration-300 flex items-center justify-between px-4 md:px-6
+        ${isMobile ? 'left-0' : (isCollapsed ? 'left-20' : 'left-64')}
+      `}
     >
-      {/* Left: Page Title */}
-      <div>
-        <h1 className="text-xl font-bold text-black">Trading Platform</h1>
-        <p className="text-xs text-gray-500">Welcome back! Ready to trade?</p>
+      {/* Left: Menu Button (Mobile) + Page Title */}
+      <div className="flex items-center gap-3">
+        {isMobile && (
+          <button
+            onClick={onMenuClick}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <MenuIcon />
+          </button>
+        )}
+        <div className="hidden sm:block">
+          <h1 className="text-lg md:text-xl font-bold text-black">Trading Platform</h1>
+          <p className="text-xs text-gray-500 hidden md:block">Welcome back! Ready to trade?</p>
+        </div>
+        <div className="block sm:hidden">
+          <h1 className="text-base font-bold text-black">Binance</h1>
+        </div>
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-3">
-        {/* Search Bar */}
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* Search Bar - Desktop */}
         <button
           onClick={handleSearchClick}
           className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
         >
           <SearchIcon />
-          <span className="text-sm text-gray-600">Search...</span>
-          <kbd className="px-2 py-1 bg-white border border-gray-300 rounded text-xs text-gray-500">
+          <span className="text-sm text-gray-600 hidden lg:inline">Search...</span>
+          <kbd className="hidden lg:flex items-center px-2 py-1 bg-white border border-gray-300 rounded text-xs text-gray-500">
             ⌘K
           </kbd>
         </button>
 
-        {/* Search Button Mobile */}
+        {/* Search Button - Mobile */}
         <button
           onClick={handleSearchClick}
           className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -132,8 +156,8 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
           <SearchIcon />
         </button>
 
-        {/* Language Selector */}
-        <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Change Language">
+        {/* Language Selector - Hidden on mobile */}
+        <button className="hidden lg:block p-2 hover:bg-gray-100 rounded-lg transition-colors" title="Change Language">
           <LanguageIcon />
         </button>
 
@@ -151,7 +175,7 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
 
           {/* Notification Dropdown */}
           {isNotificationOpen && (
-            <div className="notification-dropdown absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-[500px] overflow-hidden flex flex-col animate-fade-in">
+            <div className="notification-dropdown absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-[500px] overflow-hidden flex flex-col animate-fade-in">
               <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-bold text-black">Notifications</h3>
@@ -165,7 +189,7 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
                 {unreadCount > 0 && (
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">
-                      {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}
+                      {unreadCount} unread
                     </p>
                     <button
                       onClick={handleMarkAllAsRead}
@@ -187,9 +211,9 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="text-sm font-bold text-black mb-1">{notif.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{notif.message}</p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-black mb-1 truncate">{notif.title}</h4>
+                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{notif.message}</p>
                         <span className="text-xs text-gray-500">{notif.time}</span>
                       </div>
                       {!notif.read && (
@@ -203,7 +227,7 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
               {notifications.length > 0 && (
                 <div className="p-3 border-t border-gray-200">
                   <button className="w-full py-2 text-sm font-medium text-black hover:bg-gray-50 rounded-lg transition-colors">
-                    View All Notifications
+                    View All
                   </button>
                 </div>
               )}
@@ -211,10 +235,10 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
           )}
         </div>
 
-        {/* Live Market Indicator */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+        {/* Live Market Indicator - Hidden on small mobile */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="text-xs font-semibold text-green-700">Markets Live</span>
+          <span className="text-xs font-semibold text-green-700 hidden lg:inline">Markets Live</span>
         </div>
       </div>
 
@@ -225,4 +249,3 @@ const AppTopbar = ({ isCollapsed }: AppTopbarProps) => {
 };
 
 export default memo(AppTopbar);
-
