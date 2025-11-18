@@ -63,24 +63,19 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
         />
       )}
 
-      {/* Sidebar - Desktop: Always visible, Mobile: Slide-in when open */}
-      <div className={`
-        fixed left-0 top-0 h-screen z-50
-        md:translate-x-0
-        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        transition-transform duration-300 ease-in-out
-      `}>
-        <AppSidebar
-          isCollapsed={isSidebarCollapsed}
-          onToggle={handleSidebarToggle}
-          onClose={handleMobileSidebarClose}
-        />
-      </div>
+      {/* Sidebar */}
+      <AppSidebar
+        isCollapsed={isSidebarCollapsed}
+        onToggle={handleSidebarToggle}
+        onClose={handleMobileSidebarClose}
+        isMobileOpen={isMobileSidebarOpen}
+      />
       
-      {/* Main Content Area */}
+      {/* Main Content Area - Adjusted for sidebar */}
       <div className={`
+        min-h-screen
         transition-all duration-300
-        md:ml-64 md:${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
+        md:ml-${isSidebarCollapsed ? '20' : '64'}
       `}>
         {/* Topbar */}
         <AppTopbar
@@ -89,7 +84,7 @@ const LayoutWrapper = memo(({ children }: LayoutWrapperProps) => {
         />
         
         {/* Page Content */}
-        <main className="pt-16 pb-20 md:pb-6 min-h-screen">
+        <main className="pt-16 pb-20 md:pb-6">
           {children}
         </main>
 

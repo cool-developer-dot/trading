@@ -99,10 +99,11 @@ WithdrawIcon.displayName = 'WithdrawIcon';
 interface SidebarProps {
   isCollapsed: boolean;
   onToggle: () => void;
-  onClose?: () => void;
+  onClose: () => void;
+  isMobileOpen: boolean;
 }
 
-const AppSidebar = ({ isCollapsed, onToggle, onClose }: SidebarProps) => {
+const AppSidebar = ({ isCollapsed, onToggle, onClose, isMobileOpen }: SidebarProps) => {
   const pathname = usePathname();
 
   const navItems = useMemo(
@@ -136,9 +137,11 @@ const AppSidebar = ({ isCollapsed, onToggle, onClose }: SidebarProps) => {
   return (
     <aside
       className={`
-        h-screen bg-white border-r border-gray-200 flex flex-col
-        transition-all duration-300
+        fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-50 flex flex-col
+        transition-all duration-300 ease-in-out
         ${isCollapsed ? 'w-20' : 'w-64'}
+        ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0
       `}
     >
       {/* Logo & Toggle */}
@@ -159,22 +162,28 @@ const AppSidebar = ({ isCollapsed, onToggle, onClose }: SidebarProps) => {
           </Link>
         )}
         
-        {/* Close button for mobile, Collapse for desktop */}
-        <button
-          onClick={() => {
-            if (onClose) {
-              onClose(); // Mobile: close sidebar
-            } else {
-              onToggle(); // Desktop: collapse/expand
-            }
-          }}
-          className={`p-2 hover:bg-gray-100 rounded-lg transition-colors ${
-            isCollapsed ? 'hidden md:block' : 'block'
-          }`}
-        >
-          <span className="md:hidden"><XIcon /></span>
-          <span className="hidden md:block"><ChevronLeftIcon /></span>
-        </button>
+        {/* Close X button for mobile, Collapse arrow for desktop */}
+        {!isCollapsed && (
+          <>
+            {/* Mobile: X button */}
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors md:hidden"
+              aria-label="Close menu"
+            >
+              <XIcon />
+            </button>
+            
+            {/* Desktop: Collapse arrow */}
+            <button
+              onClick={onToggle}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors hidden md:block"
+              aria-label="Collapse sidebar"
+            >
+              <ChevronLeftIcon />
+            </button>
+          </>
+        )}
       </div>
 
       {/* User Profile */}
@@ -223,10 +232,10 @@ const AppSidebar = ({ isCollapsed, onToggle, onClose }: SidebarProps) => {
       )}
 
       {/* Navigation - Scrollable */}
-      <nav className="flex-1 overflow-y-auto px-2">
+      <nav className="flex-1 overflow-y-auto px-2 scrollbar-hide">
         <div className="space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.name}
