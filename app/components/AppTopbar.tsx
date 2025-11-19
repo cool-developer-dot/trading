@@ -46,12 +46,18 @@ interface AppTopbarProps {
 const AppTopbar = ({ isCollapsed, onMenuClick }: AppTopbarProps) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'BTC Price Alert', message: 'Bitcoin reached $102,000!', time: '2m ago', read: false },
     { id: 2, title: 'Trade Executed', message: 'Your ETH buy order was filled', time: '15m ago', read: false },
     { id: 3, title: 'New Feature', message: 'Try our new portfolio tracker', time: '1h ago', read: true },
     { id: 4, title: 'Market Update', message: 'SOL up 8.45% in 24h', time: '2h ago', read: true },
   ]);
+
+  // Handle client-side mounting to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSearchClick = useCallback(() => {
     setIsSearchOpen(true);
@@ -109,7 +115,7 @@ const AppTopbar = ({ isCollapsed, onMenuClick }: AppTopbarProps) => {
   return (
     <div className="fixed top-0 left-0 right-0 md:left-64 h-16 bg-white border-b border-gray-200 z-30 flex items-center justify-between px-4 md:px-6 transition-all duration-300"
       style={{
-        left: typeof window !== 'undefined' && window.innerWidth >= 768 ? (isCollapsed ? '5rem' : '16rem') : '0'
+        left: isMounted && window.innerWidth >= 768 ? (isCollapsed ? '5rem' : '16rem') : '0'
       }}
     >
       {/* Left: Hamburger Menu (Mobile) + Page Title */}
